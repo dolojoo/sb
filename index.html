@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>성북구민 정보화교육 자가진단 도우미</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --navy:#0f3a5f; --navy-2:#1c5584; --sky:#e3f2fb; --sky-2:#c9e6f6;
+  --pink:#fbe9ec; --red:#d93636; --ink:#1b2430; --sub:#566271; --line:#d8e2ea;
+  --card:#ffffff; --ok:#1f7a4d; --ok-bg:#e5f5ec; --warn:#a65d00; --warn-bg:#fff3dc;
+  --fs:17px;
+}
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+html.big{--fs:20px}
+body{margin:0;font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);
+  background:linear-gradient(180deg,#d6eefa 0%,#eef7fc 45%,#fbeef0 100%);background-attachment:fixed;line-height:1.6;word-break:keep-all}
+.wrap{max-width:660px;margin:0 auto;padding:20px 16px 40px}
+header.top{text-align:center;padding:12px 4px 6px}
+.badge-gu{display:inline-block;background:var(--navy);color:#fff;font-weight:700;font-size:.8rem;padding:4px 12px;border-radius:999px;letter-spacing:.02em}
+h1{font-size:1.75rem;margin:.5rem 0 .2rem;color:var(--navy);letter-spacing:-.02em;line-height:1.3}
+.lead{color:var(--sub);margin:0}
+.tools{display:flex;justify-content:flex-end;margin:6px 0 4px}
+.tbtn{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font:inherit;font-size:.85rem;color:var(--navy);cursor:pointer}
+.tbtn[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.notice{background:#fff;border-left:6px solid var(--red);border-radius:14px;padding:12px 16px;margin:10px 0 14px;box-shadow:0 2px 10px rgba(15,58,95,.06)}
+.notice b{color:var(--red)}
+.notice.done{border-left-color:var(--sub)}
+.notice.done b{color:var(--sub)}
+
+.steps{display:flex;gap:6px;margin:14px 0}
+.steps div{flex:1;text-align:center;font-size:.78rem;color:var(--sub);font-weight:600}
+.steps div::before{content:"";display:block;height:6px;border-radius:3px;background:var(--sky-2);margin-bottom:6px}
+.steps div.on{color:var(--navy)}
+.steps div.on::before{background:var(--navy)}
+
+.card{background:var(--card);border-radius:20px;padding:24px 20px;box-shadow:0 6px 24px rgba(15,58,95,.09)}
+.step-label{font-size:.85rem;font-weight:700;color:var(--navy-2)}
+h2{font-size:1.4rem;margin:.15rem 0 .4rem;color:var(--navy);letter-spacing:-.01em}
+.help{color:var(--sub);margin:0 0 16px;font-size:.95rem}
+label.f{display:block;font-weight:700;margin:18px 0 8px}
+label.f small{font-weight:500;color:var(--sub)}
+input[type=text]{width:100%;font:inherit;font-size:1.1rem;padding:14px 16px;border:2px solid var(--line);border-radius:14px;outline:none}
+input[type=text]:focus{border-color:var(--navy-2)}
+.msg{margin-top:8px;font-size:.92rem;padding:10px 12px;border-radius:10px;display:none}
+.msg.ok{display:block;background:var(--ok-bg);color:var(--ok)}
+.msg.warn{display:block;background:var(--warn-bg);color:var(--warn)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:inherit;font-size:1rem;background:#fff;border:2px solid var(--line);border-radius:14px;padding:11px 16px;cursor:pointer;color:var(--ink);text-align:left}
+.opt:hover{border-color:var(--navy-2)}
+.opt[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.opts.col{flex-direction:column}
+.opts.col .opt{width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+.opt .em{font-size:1.25rem;margin-right:6px}
+.opt .d{display:block;font-size:.8rem;opacity:.75;margin-top:2px}
+
+.q{margin:0 0 22px}
+.q h3{font-size:1.05rem;margin:0 0 10px}
+.q h3 span{display:inline-block;background:var(--sky);color:var(--navy);border-radius:8px;padding:0 8px;margin-right:6px;font-size:.9rem}
+
+.nav{display:flex;gap:10px;margin-top:24px}
+.btn{font:inherit;font-weight:700;font-size:1.05rem;border:0;border-radius:14px;padding:15px 18px;cursor:pointer}
+.btn.pri{flex:1;background:var(--navy);color:#fff}
+.btn.pri:hover{background:var(--navy-2)}
+.btn.sec{background:#eef3f7;color:var(--navy)}
+.btn.ghost{background:transparent;color:var(--navy);text-decoration:underline;padding:10px}
+.err{color:var(--red);font-size:.92rem;margin-top:10px;min-height:1em}
+
+/* results */
+.summary{background:var(--sky);border-radius:14px;padding:12px 16px;font-size:.93rem;margin-bottom:14px}
+.summary b{color:var(--navy)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.chip{font:inherit;font-size:.85rem;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--navy-2);color:#fff;border-color:var(--navy-2)}
+.fgroup{font-size:.8rem;color:var(--sub);font-weight:700;width:100%;margin-top:4px}
+h3.sec{font-size:1.1rem;color:var(--navy);margin:22px 0 10px}
+.course{border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:#fff}
+.course.top{border-color:var(--navy-2);box-shadow:0 4px 16px rgba(28,85,132,.12)}
+.course .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.course h4{margin:0;font-size:1.15rem;line-height:1.35}
+.stars{white-space:nowrap;font-size:1rem;color:var(--navy)}
+.stars.basic{color:var(--red)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.tag{font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px;background:#eef3f7;color:var(--navy)}
+.tag.fit{background:var(--ok-bg);color:var(--ok)}
+.tag.ch{background:var(--warn-bg);color:var(--warn)}
+.tag.red{background:#fde8e8;color:var(--red)}
+.tag.near{background:#e8eefc;color:#2a4fa8}
+.meta{font-size:.92rem;margin:6px 0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.meta dt{color:var(--sub);font-weight:600}
+.meta dd{margin:0}
+.content{font-size:.9rem;color:var(--sub);background:#f7fafc;border-radius:10px;padding:8px 10px;margin:8px 0}
+.why{font-size:.88rem;color:var(--navy-2);margin-top:6px}
+.fee{font-size:.9rem;margin-top:6px}
+.fee b{color:var(--ok)}
+.phone-say{font-size:.85rem;background:#fff8e6;border-radius:10px;padding:8px 10px;margin-top:8px}
+details.more{margin-top:10px}
+details.more summary{cursor:pointer;font-weight:700;color:var(--navy);padding:10px 0}
+.empty{color:var(--sub);font-size:.95rem;background:#f7fafc;padding:12px;border-radius:12px}
+.actions{display:grid;gap:10px;margin-top:22px}
+.actions .btn{width:100%}
+
+/* modal */
+dialog{border:0;border-radius:20px;padding:0;max-width:720px;width:calc(100% - 24px);max-height:88vh}
+dialog::backdrop{background:rgba(10,30,50,.45)}
+.mhead{position:sticky;top:0;background:var(--navy);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.mhead h2{color:#fff;margin:0;font-size:1.15rem}
+.mclose{background:#fff;color:var(--navy);border:0;border-radius:10px;font:inherit;font-weight:700;padding:6px 12px;cursor:pointer}
+.mbody{padding:16px 18px 24px;overflow:auto}
+.room h3{font-size:1rem;margin:18px 0 6px;color:var(--navy)}
+.room p.sub{margin:0 0 6px;font-size:.82rem;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:var(--navy);color:#fff;font-weight:600;padding:6px;text-align:center}
+td{border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top}
+td.t{white-space:nowrap;color:var(--sub)}
+td.n{font-weight:700}
+td.s{text-align:center;white-space:nowrap}
+.info{width:100%;border-collapse:collapse;font-size:.92rem;margin:6px 0 12px}
+.info th{background:#eef3f7;color:var(--navy);text-align:left;width:28%;padding:8px;border-bottom:1px solid var(--line)}
+.info td{padding:8px;border-bottom:1px solid var(--line)}
+.place{background:#f7fafc;border-radius:12px;padding:12px 14px;margin:8px 0;font-size:.9rem}
+.place b{color:var(--navy)}
+a{color:var(--navy-2)}
+footer{text-align:center;color:var(--sub);font-size:.82rem;margin-top:28px;line-height:1.7}
+footer a{font-weight:700}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tools"><button class="tbtn" id="bigBtn" aria-pressed="false">가 글자 크게</button></div>
+  <header class="top">
+    <span class="badge-gu">성북구민 정보화교육 · 12월</span>
+    <h1>내게 맞는 강좌 찾기</h1>
+    <p class="lead">동네 확인부터 자가진단까지,<br>3분이면 딱 맞는 강좌를 찾아드려요.</p>
+  </header>
+
+  <div id="notice" class="notice"></div>
+
+  <nav class="steps" aria-label="진행 단계">
+    <div data-s="1">① 동네 확인</div><div data-s="2">② 관심 분야</div><div data-s="3">③ 자가진단</div><div data-s="4">④ 추천 강좌</div>
+  </nav>
+
+  <!-- STEP 1 -->
+  <section class="card" id="s1">
+    <div class="step-label">STEP 1</div>
+    <h2>어디에 사시나요?</h2>
+    <p class="help">주민등록상 주소지가 성북구인 분만 신청할 수 있어요. <b>동 이름만</b> 적어주세요.<br>(예: 삼선동, 정릉3동, 장위1동, 월곡2동)</p>
+    <input type="text" id="dong" placeholder="예) 길음1동" autocomplete="off" aria-describedby="dongMsg">
+    <div id="dongMsg" class="msg" role="status"></div>
+
+    <label class="f">나이를 알려주세요 <small>(수강료·신청 가능 과정 안내에 써요)</small></label>
+    <div class="opts" id="age">
+      <button class="opt" data-v="65">65세 이상<span class="d">1962.1.1 이전 출생</span></button>
+      <button class="opt" data-v="55">55~64세</button>
+      <button class="opt" data-v="0">55세 미만</button>
+      <button class="opt" data-v="na">답변 안 함</button>
+    </div>
+
+    <label class="f">해당하는 것이 있나요? <small>(선택, 여러 개 가능)</small></label>
+    <div class="opts" id="benefit">
+      <button class="opt" data-v="dis">장애인</button>
+      <button class="opt" data-v="basic">기초생활수급자</button>
+      <button class="opt" data-v="merit">국가유공자</button>
+    </div>
+
+    <div class="err" id="err1"></div>
+    <div class="nav"><button class="btn pri" id="next1">다음으로</button></div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="card hidden" id="s2">
+    <div class="step-label">STEP 2</div>
+    <h2>무엇을 배워보고 싶으세요?</h2>
+    <p class="help">자유롭게 적거나, 아래에서 골라주세요. <b>여러 개</b> 골라도 돼요.<br>아무것도 고르지 않으면 수준에 맞는 강좌를 전체에서 찾아드려요.</p>
+    <input type="text" id="free" placeholder="예) 카톡으로 사진 보내기, 챗GPT, 엑셀 가계부" autocomplete="off">
+    <div class="grid2" id="interests" style="margin-top:14px"></div>
+    <div class="nav"><button class="btn sec" data-go="1">이전</button><button class="btn pri" id="next2">다음으로</button></div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="card hidden" id="s3">
+    <div class="step-label">STEP 3</div>
+    <h2>세 가지만 답해주세요</h2>
+    <p class="help">가장 가까운 답을 골라주세요. 알맞은 난이도의 강좌를 찾는 데 써요.</p>
+    <div id="questions"></div>
+    <div class="err" id="err3"></div>
+    <div class="nav"><button class="btn sec" data-go="2">이전</button><button class="btn pri" id="next3">추천 결과 보기</button></div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="card hidden" id="s4">
+    <div class="step-label">STEP 4</div>
+    <h2>12월 추천 강좌예요</h2>
+    <div class="summary" id="summary"></div>
+    <div class="filters" id="filters"></div>
+    <div id="results"></div>
+    <div class="actions">
+      <button class="btn pri" id="openTT">12월 전체 시간표 보기</button>
+      <button class="btn sec" id="openHow">[접수방법] 보기</button>
+      <button class="btn ghost" id="restart">처음부터 다시 진단하기 ↺</button>
+    </div>
+  </section>
+
+  <footer>
+    성북구청 정보화교육 · 상담 및 문의 <a href="tel:02-2241-4600">☎ 02-2241-4600</a><br>
+    이 도우미는 강좌 선택을 돕기 위한 <b>참고용</b>이에요.<br>실제 신청은 성북구청 홈페이지 또는 전화로 해주세요.
+  </footer>
+</div>
+
+<!-- 시간표 -->
+<dialog id="dlgTT" aria-labelledby="ttTitle">
+  <div class="mhead"><h2 id="ttTitle">12월 전체 시간표</h2><button class="mclose" data-close>닫기 ✕</button></div>
+  <div class="mbody" id="ttBody"></div>
+</dialog>
+<!-- 접수방법 -->
+<dialog id="dlgHow" aria-labelledby="howTitle">
+  <div class="mhead"><h2 id="howTitle">접수 방법 · 수강료 안내</h2><button class="mclose" data-close>닫기 ✕</button></div>
+  <div class="mbody" id="howBody"></div>
+</dialog>
+
+<script>
+/* ===================== 데이터 (2026년 12월 성북구민 정보화교육 안내문 기준) ===================== */
+const PHONE = '02-2241-4600';
+const PLACES = {
+  center:{ name:'성북 정보화센터', area:'삼선동', addr:'삼선교로4길 47-1 (1~2층)',
+    subway:'4호선 한성대입구역 3번 출구 (도보 7~10분)', bus:'성북01번 삼선교제1시장 하차 (도보 6~10분)',
+    map:'https://map.naver.com/p/search/성북정보화센터' },
+  lib:{ name:'성북 정보도서관', area:'상월곡동', addr:'화랑로18자길 13 (4층)',
+    subway:'6호선 상월곡역 3·4번 출구 (도보 5~10분)', bus:'120·173·1111번 월곡중학교 하차 (도보 5~10분)',
+    map:'https://map.naver.com/p/search/성북정보도서관' }
+};
+const ROOMS = {
+  C1:{place:'center', room:'1강의실', cap:20, teacher:'엄지영'},
+  C2:{place:'center', room:'2강의실', cap:28, teacher:'변정아'},
+  L1:{place:'lib',    room:'1강의실', cap:30, teacher:'오상열'},
+  L2:{place:'lib',    room:'2강의실', cap:18, teacher:'홍승회'},
+};
+const DAYS = { WF:{label:'수·금', period:'12/2~12/30'}, TT:{label:'화·목', period:'12/3~12/29'} };
+// dev: pc | phone | both   lv: 난이도(1~3, 1=★ 기초과정)   tags: 관심 분야
+const C = (room,day,time,name,dev,lv,tags,content,extra={}) => ({room,day,time,name,dev,lv,tags,content,...extra});
+const COURSES = [
+  C('C1','WF','09:30~12:00','한글 활용(2단계)','pc',2,['doc'],'(컴퓨터) 한글 세부 기능(표, 문단과 쪽 설정, 스타일 등) 학습 후 생활 문서 만들기'),
+  C('C1','WF','13:00~15:30','스마트폰 기초','phone',1,['phone'],'(스마트폰) 스마트폰 화면설정, 시계/캘린더/노트(메모)/갤러리/문자/카카오톡 등 생활에 필요한 스마트폰 기본 사용법 학습'),
+  C('C1','WF','15:30~18:00','파워포인트 인포그래픽 시각화 자료 만들기','pc',3,['doc'],'(컴퓨터) PPT의 기능(도형, 아이콘, SmartArt 등) 활용해 정보를 시각적으로 표현하기'),
+  C('C1','TT','09:30~12:00','엑셀 기초(1단계)','pc',2,['doc'],'(컴퓨터) 데이터 입력, 서식꾸미기, 데이터 정렬/필터, 자주 사용하는 함수 등 엑셀을 시작하기 위한 기본 기능 학습'),
+  C('C1','TT','13:00~15:30','AI 활용 실무 문서 제작','pc',3,['ai','doc'],'(컴퓨터) 구글문서와 ChatGPT, Gemini 등 AI를 활용하여 글쓰기, 문서 편집, 이미지 삽입, 번역 기술 학습'),
+  C('C1','TT','15:30~18:00','AI 활용 영상 제작(VREW)','pc',2,['video','ai','youtube'],'(컴퓨터) 자동 자막, 영상 컷 편집, 배경음악 삽입 등 영상 편집에 필요한 필수 기능을 학습하여 유튜브 업로드용 숏폼 영상 제작'),
+
+  C('C2','WF','09:30~12:00','어르신 디지털 생활 교육','phone',1,['life','phone'],'(스마트폰) 네이버 앱, 대중교통 앱, 택시 호출하기, 결제방법(서울페이), 중고거래 앱, 무인기기(키오스크) 체험',{senior:true}),
+  C('C2','WF','13:00~15:30','다양한 AI 활용(1단계, AI 사용법)','phone',2,['ai'],'(스마트폰) AI 이해하기, 질문하고 답변받기, 정보찾기와 글쓰기, 이미지와 그림 만들기'),
+  C('C2','WF','15:30~18:00','AI 활용 에세이 전자책 제작','both',3,['ai','video','doc'],'(컴퓨터, 스마트폰) ChatGPT, Gemini 등 AI를 활용하여 원고 작성, Canva로 편집하여 사진 에세이북을 전자책(PDF)으로 제작하기'),
+  C('C2','TT','09:30~12:00','디지털 기기 반복학습 종합반(컴퓨터, 스마트폰)','both',1,['phone','pc'],'(컴퓨터, 스마트폰) 기본 용어와 사용법을 세부적으로 정확히 인지하고 충분한 반복 실습을 통해 기본기를 완벽히 다져 디지털 기기에 익숙해질 수 있는 과정'),
+  C('C2','TT','13:00~15:30','다양한 AI 활용(2단계, 컨텐츠 제작)','phone',3,['ai','video'],'(스마트폰) ChatGPT, Gemini, Suno 등 다양한 AI를 활용하여 컨텐츠(이미지, 노래 등) 생성하기'),
+  C('C2','TT','15:30~18:00','AI 활용 일상생활 문제해결','phone',2,['ai','life'],'(스마트폰) AI를 활용하여 쇼핑, 여행, 문서, 소비, 스마트폰 등 일상생활의 다양한 문제 해결하는 방법 익히기'),
+
+  C('L1','WF','09:30~12:00','컴퓨터 기초(윈도우11)','pc',1,['pc'],'(컴퓨터) PC와 윈도우 이해, 디스플레이 등 PC 맞춤 설정, 인터넷 사용을 위한 기본기 학습',{pcBasic:true}),
+  C('L1','WF','13:00~15:30','AI 활용 생활 문서 제작','pc',3,['ai','doc'],'(컴퓨터) AI를 활용한 쉽고 빠른 정보 검색, 생활 문서 작성을 위한 한글 편집 기술 학습'),
+  C('L1','WF','15:30~18:00','연말연시 인사 영상 제작(캡컷)','pc',2,['video'],'(컴퓨터) 캡컷 사진 및 영상 편집 기능을 활용해 연말연시 컨텐츠 제작'),
+  C('L1','TT','09:30~12:00','어르신 디지털 생활 교육','phone',1,['life','phone'],'(스마트폰) AI비서, 지도앱과 대중교통 활용하기, Pay 사용하기, 중고거래하기, 무인기기(키오스크) 현장체험',{senior:true}),
+  C('L1','TT','13:00~15:30','다양한 AI 활용(1단계, AI 사용법)','phone',2,['ai'],'(스마트폰) AI 이해하기, 질문하고 답변받기, 정보찾기와 글쓰기, 이미지와 그림 만들기'),
+  C('L1','TT','15:30~18:00','스마트폰 기초','phone',1,['phone'],'(스마트폰) 스마트폰 화면설정, 시계/캘린더/노트(메모)/갤러리/문자/카카오톡 등 생활에 필요한 스마트폰 기본 사용법 학습'),
+
+  C('L2','WF','09:30~12:00','컴퓨터 활용','pc',2,['pc'],'(컴퓨터) 파일/폴더 관리, 알아두면 편리한 단축키 사용법, 엣지/크롬 브라우저 개인정보 설정과 관리, 구글포토/구글드라이브/USB 등 자료 백업 관리 방법 학습'),
+  C('L2','WF','13:00~15:30','문서 작성 속성(한글+엑셀+PPT)','pc',3,['doc','ai'],'(컴퓨터) AI를 활용한 한글(연하장), PPT(크리스마스 슬라이드 앨범), 엑셀(가계부 등) 생활에 필요한 문서 작성 방법 학습'),
+  C('L2','WF','15:30~18:00','유튜브 크리에이터(2단계)','both',3,['youtube','video'],'(컴퓨터, 스마트폰) 내 채널 분석, 동영상 관리, 저작권 관리, 라이브 방송을 위한 셋팅 등 컨텐츠와 채널 관리 방법 및 라이브 방송 실습'),
+  C('L2','TT','09:30~12:00','엑셀 활용(2단계)','pc',2,['doc'],'(컴퓨터) 실무자를 위한 필수 함수, 데이터 관리, 데이터 분석과 가상 분석, 데이터 시각화 방법 학습'),
+  C('L2','TT','13:00~15:30','연말연시 인사 영상 제작(캔바, 미리캔버스)','both',2,['video'],'(컴퓨터, 스마트폰) 캔바, 미리캔버스 사진 및 영상 편집 기능을 활용해 연말연시 컨텐츠 제작'),
+  C('L2','TT','15:30~18:00','스마트폰 생활 앱 활용','phone',2,['phone','life','ai'],'(스마트폰) 스마트폰 기본 앱 사용법, 길찾기(지도앱), 택시 호출, AI 앱 활용, 쇼핑 앱 등 생활에 필요한 앱 사용 방법 학습'),
+];
+COURSES.forEach((c,i)=>{c.id=i; c.basic = c.lv===1; c.am = c.time.startsWith('09');});
+
+const INTERESTS = [
+  {k:'phone', em:'📱', t:'스마트폰 기본 사용', d:'카톡, 사진, 문자, 화면 설정'},
+  {k:'life',  em:'🚌', t:'생활 앱·키오스크', d:'지도·교통·택시·결제·중고거래'},
+  {k:'pc',    em:'🖥️', t:'컴퓨터 기초·관리', d:'윈도우, 인터넷, 파일 정리'},
+  {k:'doc',   em:'📝', t:'문서 만들기', d:'한글, 엑셀, 파워포인트'},
+  {k:'ai',    em:'🤖', t:'AI 활용', d:'ChatGPT, Gemini 등'},
+  {k:'video', em:'🎬', t:'영상·사진·디자인', d:'캡컷, VREW, 캔바, 전자책'},
+  {k:'youtube',em:'▶️', t:'유튜브 채널 운영', d:'채널 관리, 숏폼, 라이브'},
+];
+const KEYWORDS = {
+  phone:['스마트폰','핸드폰','휴대폰','휴대전화','폰','카톡','카카오','문자','갤러리','사진 보내','메모','캘린더'],
+  life:['키오스크','무인','택시','지하철','버스','교통','길찾','지도','결제','페이','서울페이','중고','당근','쇼핑','배달','은행','예약'],
+  pc:['컴퓨터','윈도우','pc','인터넷','파일','폴더','백업','usb','단축키','크롬','엣지','마우스','자판','타자'],
+  doc:['한글','문서','엑셀','파워포인트','ppt','피피티','표','가계부','함수','연하장','서식','보고서'],
+  ai:['ai','인공지능','챗gpt','chatgpt','gpt','지피티','쳇gpt','제미나이','gemini','suno','수노','비서','번역'],
+  video:['영상','동영상','사진 편집','편집','캡컷','capcut','vrew','브루','캔바','canva','미리캔버스','노래','이미지','그림','전자책','에세이','디자인','숏폼'],
+  youtube:['유튜브','youtube','채널','라이브','방송','크리에이터','구독'],
+};
+
+const QUESTIONS = [
+  {id:'phone', t:'스마트폰은 어느 정도 쓰세요?', o:[
+    {v:1,t:'전화 받고 걸기 정도만 해요. 카톡이나 사진 보내기는 어려워요.'},
+    {v:2,t:'카톡·사진은 쓰지만, 앱 설치나 설정은 자신이 없어요.'},
+    {v:3,t:'앱을 직접 찾아 설치하고 설정도 혼자 바꿀 수 있어요.'}]},
+  {id:'pc', t:'컴퓨터는 어느 정도 쓰세요?', o:[
+    {v:0.6,t:'거의 안 써봤어요. 마우스·자판 쓰는 게 서툴러요.'},
+    {v:1.6,t:'인터넷 검색, 파일 저장 정도는 할 수 있어요.'},
+    {v:2.4,t:'한글·엑셀 같은 프로그램을 써본 적이 있어요.'},
+    {v:3,t:'문서 작업이나 프로그램 사용이 익숙해요.'}]},
+  {id:'pace', t:'새로운 걸 배울 때 나는…', o:[
+    {v:-0.5,t:'천천히, 여러 번 반복해야 익숙해져요.'},
+    {v:0,t:'옆에서 알려주면 따라 할 수 있어요.'},
+    {v:0.5,t:'설명을 들으면 혼자서도 응용해봐요.'}]},
+];
+
+/* 성북구 동 (행정동·법정동) */
+const DONG_BASE = ['성북','삼선','동선','돈암','안암','보문','정릉','길음','종암','월곡','상월곡','하월곡','장위','석관','동소문'];
+const NEAR = { center:['성북','삼선','동선','돈암','안암','보문','동소문','정릉','길음'], lib:['종암','월곡','상월곡','하월곡','장위','석관'] };
+
+/* ===================== 상태 ===================== */
+const S = { dong:'', base:null, near:null, age:null, benefit:new Set(), interests:new Set(), free:'', ans:{}, f:{place:'all',day:'all',ampm:'all'} };
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+/* 글자 크게 */
+(function(){
+  let big=false; try{big=localStorage.getItem('sbBig')==='1'}catch(e){}
+  const b=$('#bigBtn'); const apply=()=>{document.documentElement.classList.toggle('big',big); b.setAttribute('aria-pressed',big)};
+  apply(); b.onclick=()=>{big=!big; apply(); try{localStorage.setItem('sbBig',big?'1':'0')}catch(e){}};
+})();
+
+/* 접수 기간 알림 (한국시간 기준) */
+(function(){
+  const now = new Date(Date.now() + 9*3600e3); // KST as UTC fields
+  const y=now.getUTCFullYear(), m=now.getUTCMonth()+1, d=now.getUTCDate(), h=now.getUTCHours();
+  const key = y*10000+m*100+d; const open = h>=9 && h<18;
+  const n=$('#notice'); let html='';
+  if(key<20261124) html='<b>12월 강좌 1차 접수</b>는 <b>11/24(화)~11/25(수) 9:00~18:00</b>에 시작해요. (1인 1강좌)';
+  else if(key===20261124 || key===20261125){
+    if(key===20261125 && h>=18) html='1차 접수가 끝났어요. <b>2차(추가) 접수</b>는 <b>11/26(목)~11/27(금) 9:00~18:00</b>, 정원 미달 과정만 받아요.';
+    else html='지금은 <b>1차 접수 기간</b>이에요 · 11/24(화)~11/25(수) 9:00~18:00 · 1인 1강좌'+(open?'':' <span style="color:#566271">(접수 시간 외)</span>');
+  }
+  else if(key===20261126 || key===20261127){
+    if(key===20261127 && h>=18) html=null;
+    else html='지금은 <b>2차(추가) 접수 기간</b>이에요 · 11/26(목)~11/27(금) 9:00~18:00 · 정원 미달 과정에 한해 여러 강좌 신청 가능'+(open?'':' <span style="color:#566271">(접수 시간 외)</span>');
+  } else html=null;
+  if(html===null){ n.classList.add('done'); html='<b>12월 강좌 접수가 마감</b>되었어요. 빈자리 문의는 ☎ '+PHONE+'으로 해주세요. 진단 결과는 다음 달 강좌를 고를 때 참고하세요.'; }
+  n.innerHTML=html;
+})();
+
+/* ===================== 화면 전환 ===================== */
+function go(n){
+  [1,2,3,4].forEach(i=>$('#s'+i).classList.toggle('hidden',i!==n));
+  document.querySelectorAll('.steps div').forEach(d=>d.classList.toggle('on',+d.dataset.s<=n));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+
+/* 단일·다중 선택 버튼 */
+function single(container, cb){ container.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{container.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); cb(b.dataset.v);}); }
+function multi(container, set){ container.querySelectorAll('.opt').forEach(b=>{b.setAttribute('aria-pressed','false'); b.onclick=()=>{const v=b.dataset.v; set.has(v)?set.delete(v):set.add(v); b.setAttribute('aria-pressed',set.has(v));};}); }
+
+/* STEP 1 */
+function checkDong(){
+  const raw=$('#dong').value.trim(); const msg=$('#dongMsg');
+  S.dong=raw; S.base=null; S.near=null;
+  if(!raw){ msg.className='msg'; return; }
+  let s=raw.replace(/\s/g,'').replace(/^서울(특별)?시?/,'').replace(/^성북구?/,'');
+  s=s.replace(/[0-9]+가$/,'').replace(/동$/,'').replace(/[0-9]+$/,'').replace(/[0-9]+가$/,'').replace(/동$/,'');
+  const hit = DONG_BASE.find(b=>s===b) || (s.length>=2 && DONG_BASE.find(b=>b.startsWith(s)));
+  if(hit){
+    S.base=hit; S.near = NEAR.center.includes(hit)?'center':'lib';
+    const p=PLACES[S.near];
+    msg.className='msg ok'; msg.innerHTML='✓ 성북구 <b>'+esc(raw.replace(/\s/g,''))+'</b> 확인했어요. 가까운 교육장은 <b>'+p.name+'('+p.area+')</b>이에요.';
+  } else {
+    msg.className='msg warn'; msg.innerHTML='성북구의 동 이름을 찾지 못했어요. 철자를 확인해주세요.<br>주민등록상 주소지가 성북구가 아니면 신청할 수 없어요. (그래도 강좌 구경은 할 수 있어요.)';
+  }
+}
+$('#dong').addEventListener('input',checkDong);
+single($('#age'), v=>{S.age=v; $('#err1').textContent='';});
+multi($('#benefit'), S.benefit);
+$('#next1').onclick=()=>{
+  checkDong();
+  if(!S.dong){ $('#err1').textContent='사시는 동 이름을 적어주세요.'; $('#dong').focus(); return; }
+  if(!S.age){ $('#err1').textContent='나이 항목을 골라주세요. (답변 안 함도 괜찮아요)'; return; }
+  $('#err1').textContent=''; go(2);
+};
+
+/* STEP 2 */
+$('#interests').innerHTML = INTERESTS.map(i=>`<button class="opt" data-v="${i.k}"><span class="em" aria-hidden="true">${i.em}</span>${i.t}<span class="d">${i.d}</span></button>`).join('');
+multi($('#interests'), S.interests);
+$('#next2').onclick=()=>{ S.free=$('#free').value.trim(); go(3); };
+
+/* STEP 3 */
+$('#questions').innerHTML = QUESTIONS.map((q,qi)=>`<div class="q" role="group" aria-label="${q.t}"><h3><span>Q${qi+1}</span>${q.t}</h3><div class="opts col" data-q="${q.id}">${q.o.map(o=>`<button class="opt" data-v="${o.v}">${o.t}</button>`).join('')}</div></div>`).join('');
+document.querySelectorAll('#questions [data-q]').forEach(c=>single(c, v=>{S.ans[c.dataset.q]=+v; $('#err3').textContent='';}));
+$('#next3').onclick=()=>{
+  const miss = QUESTIONS.findIndex(q=>S.ans[q.id]===undefined);
+  if(miss>=0){ $('#err3').textContent='Q'+(miss+1)+'에 답해주세요.'; return; }
+  S.f={place:'all',day:'all',ampm:'all'}; renderResults(); go(4);
+};
+
+/* ===================== 추천 로직 ===================== */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function levels(){
+  const pace=S.ans.pace||0;
+  return { phone:clamp(S.ans.phone+pace,1,3), pc:clamp(S.ans.pc+pace,0.5,3) };
+}
+const lvWord = v => v<1.5?'처음 배우는 단계':v<2.5?'기본은 아는 단계':'응용하는 단계';
+function freeTags(){
+  const t=S.free.toLowerCase(); const out=new Set(); if(!t) return out;
+  for(const [k,arr] of Object.entries(KEYWORDS)) if(arr.some(w=>t.includes(w))) out.add(k);
+  return out;
+}
+function evaluate(c, L, wanted, words){
+  const userLv = c.dev==='pc'?L.pc : c.dev==='phone'?L.phone : Math.min(L.pc,L.phone);
+  const diff = c.lv - userLv;
+  let fit = diff>0.75?'hard' : diff>0?'challenge' : diff>=-1?'fit' : 'easy';
+  let hits = c.tags.filter(t=>wanted.has(t)).length;
+  const txt=(c.name+' '+c.content).toLowerCase();
+  const wordHit = words.some(w=>w.length>=2 && txt.includes(w));
+  if(wordHit) hits+=1;
+  let ok=true, ageNote='';
+  if(c.senior){
+    if(S.age==='65'){ hits+=1; }
+    else if(S.age==='na'){ ageNote='65세 이상만 신청할 수 있어요'; }
+    else { ok=false; }
+  }
+  const near = S.near && ROOMS[c.room].place===S.near;
+  const score = hits*10 + ({fit:6,challenge:3,easy:1,hard:-10})[fit] + (near?2:0) + (c.senior&&S.age==='65'?3:0);
+  return {c, fit, hits, ok, near, score, ageNote, userLv};
+}
+function fee(c){
+  if(c.senior) return '<b>수강료 무료</b> · 현장 체험 학습 시 드는 비용은 개인 부담';
+  const b=S.benefit;
+  const reduce = b.size>0;
+  const extra = b.has('basic')||b.has('merit');
+  if(c.pcBasic && (S.age==='55'||S.age==='65'||reduce)) return '<b>무료</b> (55세 이상·장애인·수급자·유공자 등은 \'컴퓨터 기초\' 연 2회 무료) · 교재비 별도(1만원 내외)';
+  let s='수강료 1만원 (현장 납부) · 교재비 별도(1만원 내외)';
+  if(extra) s+='<br><b>기초생활수급자·국가유공자는 모든 정규과정 연 1회 추가 무료</b>';
+  return s;
+}
+function stars(c){ return `<span class="stars ${c.basic?'basic':''}" aria-label="난이도 ${c.lv}단계">${'★'.repeat(c.lv)}</span>`; }
+function phoneSay(c){ const r=ROOMS[c.room]; return `${PLACES[r.place].name} ${r.room} – ${DAYS[c.day].label} – ${c.time.slice(0,5)} – ${c.name}`; }
+function card(e, top){
+  const c=e.c, r=ROOMS[c.room], p=PLACES[r.place];
+  const fitTag = {fit:'<span class="tag fit">수준에 딱 맞아요</span>',challenge:'<span class="tag ch">조금 도전해볼 만해요</span>',easy:'<span class="tag">복습용으로 좋아요</span>',hard:'<span class="tag ch">지금은 어려울 수 있어요</span>'}[e.fit];
+  const why=[];
+  if(e.hits>0 && (S.interests.size||S.free)) why.push('관심 분야와 맞아요');
+  if(c.senior && S.age==='65') why.push('65세 이상 무료 과정이에요');
+  if(e.near) why.push('집에서 가까운 교육장이에요');
+  return `<article class="course ${top?'top':''}">
+    <div class="row1"><h4>${esc(c.name)}</h4>${stars(c)}</div>
+    <div class="tags">${fitTag}${c.basic?'<span class="tag red">★ 기초과정 · 전화접수 가능</span>':''}${c.senior?'<span class="tag red">65세 이상 신청 가능</span>':''}${e.near?'<span class="tag near">가까운 교육장</span>':''}</div>
+    <dl class="meta">
+      <dt>장소</dt><dd>${p.name} ${r.room} (${p.area})</dd>
+      <dt>요일</dt><dd>매주 ${DAYS[c.day].label} · ${DAYS[c.day].period}</dd>
+      <dt>시간</dt><dd>${c.time}</dd>
+      <dt>정원</dt><dd>${r.cap}명</dd>
+    </dl>
+    <div class="content">${esc(c.content)}</div>
+    ${e.ageNote?`<div class="why" style="color:var(--red)">※ ${e.ageNote}</div>`:''}
+    ${why.length?`<div class="why">💡 ${why.join(' · ')}</div>`:''}
+    <div class="fee">💳 ${fee(c)}</div>
+    ${(c.basic||c.senior)?`<div class="phone-say">📞 전화접수 시 이렇게 말씀하세요: <b>“${esc(phoneSay(c))}”</b></div>`:''}
+  </article>`;
+}
+function passFilter(e){
+  const f=S.f, c=e.c;
+  if(f.place!=='all' && ROOMS[c.room].place!==f.place) return false;
+  if(f.day!=='all' && c.day!==f.day) return false;
+  if(f.ampm==='am' && !c.am) return false;
+  if(f.ampm==='pm' && c.am) return false;
+  return true;
+}
+function renderResults(){
+  const L=levels();
+  const wanted=new Set([...S.interests, ...freeTags()]);
+  const words=S.free.toLowerCase().split(/[\s,·/]+/).filter(Boolean);
+  const anyPref = wanted.size>0 || words.length>0;
+  const all = COURSES.map(c=>evaluate(c,L,wanted,words)).filter(e=>e.ok);
+
+  // 요약
+  const intNames=[...S.interests].map(k=>INTERESTS.find(i=>i.k===k).t);
+  if(S.free) intNames.push('“'+S.free+'”');
+  const ageTxt={'65':'65세 이상','55':'55~64세','0':'55세 미만','na':'나이 미응답'}[S.age];
+  $('#summary').innerHTML = `<b>${esc(S.dong||'동 미입력')}</b> · ${ageTxt}${S.base?'':' · <span style="color:var(--warn)">성북구 동 확인 안 됨</span>'}<br>
+    스마트폰: <b>${lvWord(L.phone)}</b> · 컴퓨터: <b>${lvWord(L.pc)}</b><br>
+    관심 분야: ${intNames.length?esc(intNames.join(', ')):'전체'}`;
+
+  // 필터
+  const fdef=[['place','교육장',[['all','전체'],['center','정보화센터(삼선동)'],['lib','정보도서관(상월곡동)']]],
+              ['day','요일',[['all','전체'],['WF','수·금'],['TT','화·목']]],
+              ['ampm','시간',[['all','전체'],['am','오전'],['pm','오후']]]];
+  $('#filters').innerHTML = fdef.map(([k,l,os])=>`<div class="fgroup">${l}</div>`+os.map(([v,t])=>`<button class="chip" data-k="${k}" data-v="${v}" aria-pressed="${S.f[k]===v}">${t}</button>`).join('')).join('');
+  $('#filters').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{S.f[b.dataset.k]=b.dataset.v; renderResults();});
+
+  const list=all.filter(passFilter).sort((a,b)=>b.score-a.score);
+  let main, rest;
+  if(anyPref){
+    main=list.filter(e=>e.hits>0 && e.fit!=='hard');
+    rest=list.filter(e=>!main.includes(e));
+  } else {
+    main=list.filter(e=>e.fit==='fit'||e.fit==='challenge');
+    rest=list.filter(e=>!main.includes(e));
+  }
+  let html='';
+  if(main.length){
+    html+=main.map((e,i)=>card(e,i<2)).join('');
+  } else {
+    // 관심 분야는 있지만 수준이 맞지 않을 때 → 기초부터
+    const basics=list.filter(e=>e.c.basic);
+    html+=`<p class="empty">고르신 분야의 강좌는 지금 수준보다 조금 어려울 수 있어요. 먼저 <b>기초과정(★)</b>으로 시작해보시면 어떨까요?</p>`;
+    html+= basics.length? basics.map(e=>card(e,false)).join('') : '<p class="empty">선택한 조건(교육장·요일·시간)에 맞는 기초과정이 없어요. 위 조건을 바꿔보세요.</p>';
+  }
+  const hardWanted = rest.filter(e=>e.hits>0 && e.fit==='hard');
+  const others = rest.filter(e=>!(e.hits>0 && e.fit==='hard'));
+  if(hardWanted.length) html+=`<details class="more"><summary>관심 분야지만 지금은 어려울 수 있는 강좌 (${hardWanted.length})</summary>${hardWanted.map(e=>card(e,false)).join('')}</details>`;
+  if(others.length) html+=`<details class="more"><summary>그 밖의 12월 강좌 (${others.length})</summary>${others.map(e=>card(e,false)).join('')}</details>`;
+  if(S.age!=='65' && S.age!=='na') html+=`<p class="empty" style="margin-top:12px">※ ‘어르신 디지털 생활 교육’은 65세 이상(1962.1.1 이전 출생)만 신청할 수 있어 목록에서 뺐어요.</p>`;
+  html+=`<p class="empty" style="margin-top:12px">📌 <b>1차 접수(11/24~25)는 1인 1강좌</b>만 신청할 수 있어요. 가장 마음에 드는 강좌를 먼저 신청하고, 2차 접수(11/26~27)에 정원이 남은 과정을 추가로 신청하세요.</p>`;
+  $('#results').innerHTML=html;
+}
+
+/* ===================== 시간표 · 접수방법 ===================== */
+function buildTT(){
+  let h='';
+  for(const [rk,r] of Object.entries(ROOMS)){
+    const p=PLACES[r.place];
+    h+=`<section class="room"><h3>${p.name} ${r.room}(${p.area})</h3><p class="sub">과정별 ${r.cap}명 모집 · ${r.teacher} 강사</p>
+    <table><thead><tr><th>요일·기간</th><th>시간</th><th>과정명</th><th>난이도</th></tr></thead><tbody>`;
+    for(const dk of ['WF','TT']){
+      COURSES.filter(c=>c.room===rk&&c.day===dk).forEach(c=>{
+        h+=`<tr><td class="t">${DAYS[dk].label}<br>${DAYS[dk].period}</td><td class="t">${c.time}</td><td><span class="n">${esc(c.name)}</span>${c.senior?' <span style="color:#d93636;font-size:.8em">(65세 이상)</span>':''}<br><span style="color:#566271">${esc(c.content)}</span></td><td class="s">${stars(c)}</td></tr>`;
+      });
+    }
+    h+=`</tbody></table></section>`;
+  }
+  h+=`<p style="font-size:.85rem;color:#d93636;margin-top:14px">※ 빨간 별(★)은 기초과정으로 전화접수가 가능해요.<br>※ 교재가 선정되지 않은 과정은 학습정리자료가 제공돼요. (4회차, 8회차 총 2회)</p>`;
+  h+=`<h3 style="color:var(--navy);margin-top:18px">교육장 위치</h3>`+Object.values(PLACES).map(placeHtml).join('');
+  $('#ttBody').innerHTML=h;
+}
+function placeHtml(p){ return `<div class="place"><b>${p.name}</b> · ${p.addr}<br>🚇 ${p.subway}<br>🚌 ${p.bus}<br><a href="${p.map}" target="_blank" rel="noopener">지도에서 보기 ↗</a></div>`; }
+function buildHow(){
+  $('#howBody').innerHTML=`
+  <table class="info">
+    <tr><th>접수대상</th><td>주민등록상 주소지가 <b>성북구</b>인 구민</td></tr>
+    <tr><th>1차 접수</th><td><b>11/24(화)~11/25(수) 9:00~18:00</b><br>1인 1강좌</td></tr>
+    <tr><th>2차 접수<br>(추가접수)</th><td><b>11/26(목)~11/27(금) 9:00~18:00</b><br>정원 미달 과정에 한하여 여러 강좌 신청 가능</td></tr>
+    <tr><th>접수제한</th><td>같은 과정은 1년에 2회까지 (단, 2차 접수 시 제한 해제)</td></tr>
+    <tr><th>인터넷 접수</th><td><a href="https://www.sb.go.kr" target="_blank" rel="noopener">성북구청 홈페이지</a> → 강좌신청 → 정보화교육</td></tr>
+    <tr><th>전화 접수</th><td>기초과정(<span style="color:#d93636">★</span>)과 ‘어르신 디지털 생활 교육’만 가능<br><a href="tel:${PHONE}">☎ ${PHONE}</a></td></tr>
+  </table>
+  <div class="place" style="background:#fff8e6">📞 <b>전화접수 Tip</b><br><b>교육장 이름 – 요일 – 시간 – 과정명</b> 순서대로 말씀해주세요.<br>전화접수는 연결된 순서대로 처리해 늦어질 수 있어요. 인터넷 접수를 권해요.</div>
+  <h3 style="color:var(--navy);margin-top:18px">수강료</h3>
+  <table class="info">
+    <tr><th>성북구민</th><td>정규과정 <b>1만원</b> (현장 납부)</td></tr>
+    <tr><th>55세 이상, 장애인, 기초생활수급자, 국가유공자 등</th><td>‘컴퓨터 기초’ 과정에 한하여 <b>연 2회 무료</b><br><span style="color:#1c5584">기초생활수급자·국가유공자는 모든 정규과정 연 1회 추가 무료</span></td></tr>
+    <tr><th>교재비</th><td>별도 (1만원 내외), 현장 납부</td></tr>
+    <tr><th>어르신 디지털 생활 교육</th><td>65세 이상(1962.1.1 이전 출생) 수강 가능, <b>수강료 무료</b><br>현장 체험 학습 시 드는 비용은 개인 부담</td></tr>
+  </table>
+  <p style="font-size:.82rem;color:#566271">※ 수강료 무료 대상은 서울특별시 성북구 지능정보화 기본 조례 제33조 제1항에 따릅니다.</p>
+  <h3 style="color:var(--navy);margin-top:18px">교육생 준수사항</h3>
+  <p style="font-size:.9rem">수업 방해 행위(큰소리 혼잣말, 난폭한 행동·언어, 불필요한 대화, 수업에 방해될 정도의 과도한 질문 등)가 인정되면 수강이 제한될 수 있어요. 강사와 소통할 때 존중하는 언어를 사용해 주세요.</p>
+  <h3 style="color:var(--navy);margin-top:18px">교육장 위치</h3>${Object.values(PLACES).map(placeHtml).join('')}`;
+}
+buildTT(); buildHow();
+const open=id=>{const d=$(id); d.showModal(); d.querySelector('.mbody').scrollTop=0;};
+$('#openTT').onclick=()=>open('#dlgTT');
+$('#openHow').onclick=()=>open('#dlgHow');
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close();}));
+
+$('#restart').onclick=()=>{
+  S.dong='';S.base=null;S.near=null;S.age=null;S.benefit.clear();S.interests.clear();S.free='';S.ans={};
+  $('#dong').value='';$('#free').value='';$('#dongMsg').className='msg';
+  document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed','false'));
+  go(1);
+};
+go(1);
+</script>
+</body>
+</html>
